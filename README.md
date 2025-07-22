@@ -23,7 +23,7 @@ A comprehensive Selenium WebUI testing automation for the [Swag Labs website](ht
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/hassnain-r/Swag-Labs-Automation
    cd webui_automation
    ```
 
