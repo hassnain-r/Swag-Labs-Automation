@@ -1,11 +1,11 @@
 import pytest
-import sys
-import os
 
-# Add the project root to the Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Setup Python path using PathManager
+from utils.path_manager import PathManager
+PathManager.setup_python_path()
 
 from config.config import TestConfig
+from config.test_data import TestData
 
 
 class TestLogin:
@@ -29,88 +29,43 @@ class TestLogin:
         assert "/inventory.html" in login_page.get_current_url()
         assert "Products" in login_page.get_page_title()
     
-    def test_failed_login_with_invalid_username(self, login_page):
-        """Test failed login with invalid username"""
+    @pytest.mark.parametrize("username,password,expected_error", [
+        ("invalid_user", TestConfig.VALID_PASSWORD, "Username and password do not match"),
+        (TestConfig.VALID_USERNAME, "invalid_password", "Username and password do not match"),
+        (TestConfig.LOCKED_USERNAME, TestConfig.VALID_PASSWORD, "Sorry, this user has been locked out"),
+    ])
+    def test_failed_login_scenarios(self, login_page, username, password, expected_error):
+        """Test various failed login scenarios"""
         login_page.navigate_to_login_page()
         login_page.wait_for_login_page_to_load()
         
-        # Perform login with invalid username
-        login_page.login("invalid_user", TestConfig.VALID_PASSWORD)
+        # Perform login with invalid credentials
+        login_page.login(username, password)
         
         # Verify error message is displayed
         assert login_page.is_error_message_displayed()
         error_message = login_page.get_error_message()
         assert "Epic sadface" in error_message
-        assert "Username and password do not match" in error_message
+        assert expected_error in error_message
     
-    def test_failed_login_with_invalid_password(self, login_page):
-        """Test failed login with invalid password"""
+    @pytest.mark.parametrize("username,password,expected_error", [
+        ("", TestConfig.VALID_PASSWORD, "Username is required"),
+        (TestConfig.VALID_USERNAME, "", "Password is required"),
+        ("", "", "Username is required"),  # Empty credentials
+    ])
+    def test_login_with_empty_fields(self, login_page, username, password, expected_error):
+        """Test login with empty fields"""
         login_page.navigate_to_login_page()
         login_page.wait_for_login_page_to_load()
         
-        # Perform login with invalid password
-        login_page.login(TestConfig.VALID_USERNAME, "invalid_password")
+        # Perform login with empty fields
+        login_page.login(username, password)
         
         # Verify error message is displayed
         assert login_page.is_error_message_displayed()
         error_message = login_page.get_error_message()
         assert "Epic sadface" in error_message
-        assert "Username and password do not match" in error_message
-    
-    def test_failed_login_with_locked_user(self, login_page):
-        """Test failed login with locked user"""
-        login_page.navigate_to_login_page()
-        login_page.wait_for_login_page_to_load()
-        
-        # Perform login with locked user
-        login_page.login(TestConfig.LOCKED_USERNAME, TestConfig.VALID_PASSWORD)
-        
-        # Verify error message is displayed
-        assert login_page.is_error_message_displayed()
-        error_message = login_page.get_error_message()
-        assert "Epic sadface" in error_message
-        assert "Sorry, this user has been locked out" in error_message
-    
-    def test_login_with_empty_username(self, login_page):
-        """Test login with empty username"""
-        login_page.navigate_to_login_page()
-        login_page.wait_for_login_page_to_load()
-        
-        # Perform login with empty username
-        login_page.login("", TestConfig.VALID_PASSWORD)
-        
-        # Verify error message is displayed
-        assert login_page.is_error_message_displayed()
-        error_message = login_page.get_error_message()
-        assert "Epic sadface" in error_message
-        assert "Username is required" in error_message
-    
-    def test_login_with_empty_password(self, login_page):
-        """Test login with empty password"""
-        login_page.navigate_to_login_page()
-        login_page.wait_for_login_page_to_load()
-        
-        # Perform login with empty password
-        login_page.login(TestConfig.VALID_USERNAME, "")
-        
-        # Verify error message is displayed
-        assert login_page.is_error_message_displayed()
-        error_message = login_page.get_error_message()
-        assert "Epic sadface" in error_message
-        assert "Password is required" in error_message
-    
-    def test_login_with_empty_credentials(self, login_page):
-        """Test login with empty username and password"""
-        login_page.navigate_to_login_page()
-        login_page.wait_for_login_page_to_load()
-        
-        # Perform login with empty credentials
-        login_page.login("", "")
-        
-        # Verify error message is displayed
-        assert login_page.is_error_message_displayed()
-        error_message = login_page.get_error_message()
-        assert "Epic sadface" in error_message
+        assert expected_error in error_message
     
     def test_login_page_elements_visibility(self, login_page):
         """Test that all login page elements are visible"""

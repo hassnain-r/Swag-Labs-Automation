@@ -1,4 +1,6 @@
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from utils.base_page import BasePage
 
 
@@ -86,7 +88,7 @@ class InventoryPage(BasePage):
         try:
             badge = self.find_element(self.SHOPPING_CART_BADGE)
             return int(badge.text)
-        except:
+        except (TimeoutException, NoSuchElementException):
             return 0
     
     def click_shopping_cart(self):
@@ -118,17 +120,16 @@ class InventoryPage(BasePage):
         self.click_element(self.RESET_APP_STATE_LINK)
     
     def sort_items_by(self, sort_option):
-        """Sort items by given option"""
-        self.click_element(self.SORT_CONTAINER)
-        # Select the option by value
-        sort_option_locator = (By.CSS_SELECTOR, f"option[value='{sort_option}']")
-        self.click_element(sort_option_locator)
+        """Sort items by given option using Select class"""
+        sort_element = self.find_element(self.SORT_CONTAINER)
+        select = Select(sort_element)
+        select.select_by_value(sort_option)
     
     def get_sort_option_text(self):
         """Get the current sort option text"""
         try:
             return self.get_element_text(self.ACTIVE_OPTION)
-        except:
+        except (TimeoutException, NoSuchElementException):
             return ""
     
     def is_item_in_cart(self, item_name):

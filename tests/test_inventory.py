@@ -1,11 +1,11 @@
 import pytest
-import sys
-import os
 
-# Add the project root to the Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Setup Python path using PathManager
+from utils.path_manager import PathManager
+PathManager.setup_python_path()
 
 from config.config import TestConfig
+from config.test_data import TestData
 
 
 class TestInventory:
@@ -38,16 +38,7 @@ class TestInventory:
         assert len(item_names) == len(item_prices) == len(item_descriptions)
         
         # Verify expected items are present
-        expected_items = [
-            "Sauce Labs Backpack",
-            "Sauce Labs Bike Light",
-            "Sauce Labs Bolt T-Shirt",
-            "Sauce Labs Fleece Jacket",
-            "Sauce Labs Onesie",
-            "Test.allTheThings() T-Shirt (Red)"
-        ]
-        
-        for expected_item in expected_items:
+        for expected_item in TestData.EXPECTED_ITEMS:
             assert expected_item in item_names
     
     def test_add_item_to_cart(self, logged_in_driver, inventory_page):
@@ -250,16 +241,7 @@ class TestInventory:
         inventory_page.wait_for_inventory_page_to_load()
         
         # Check specific item prices
-        expected_prices = {
-            "Sauce Labs Backpack": "$29.99",
-            "Sauce Labs Bike Light": "$9.99",
-            "Sauce Labs Bolt T-Shirt": "$15.99",
-            "Sauce Labs Fleece Jacket": "$49.99",
-            "Sauce Labs Onesie": "$7.99",
-            "Test.allTheThings() T-Shirt (Red)": "$15.99"
-        }
-        
-        for item_name, expected_price in expected_prices.items():
+        for item_name, expected_price in TestData.EXPECTED_PRICES.items():
             actual_price = inventory_page.get_item_price_by_name(item_name)
             assert actual_price == expected_price
     

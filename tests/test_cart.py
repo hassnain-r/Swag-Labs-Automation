@@ -1,30 +1,22 @@
 import pytest
-import sys
-import os
 
-# Add the project root to the Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Setup Python path using PathManager
+from utils.path_manager import PathManager
+PathManager.setup_python_path()
 
 from config.config import TestConfig
+from config.test_data import TestData
 
 
 class TestCart:
     """Test cases for cart functionality"""
     
-    def test_cart_page_loads_correctly(self, logged_in_driver, inventory_page, cart_page):
+    def test_cart_page_loads_correctly(self, cart_with_item):
         """Test that cart page loads correctly"""
-        # Add an item to cart first
-        inventory_page.wait_for_inventory_page_to_load()
-        inventory_page.add_item_to_cart_by_name("Sauce Labs Backpack")
-        
-        # Navigate to cart
-        inventory_page.click_shopping_cart()
-        cart_page.wait_for_cart_page_to_load()
-        
         # Verify cart page elements
-        assert "/cart.html" in cart_page.get_current_url()
-        assert "Your Cart" in cart_page.get_cart_title()
-        assert cart_page.get_cart_items_count() > 0
+        assert "/cart.html" in cart_with_item.get_current_url()
+        assert "Your Cart" in cart_with_item.get_cart_title()
+        assert cart_with_item.get_cart_items_count() > 0
     
     def test_empty_cart_display(self, logged_in_driver, inventory_page, cart_page):
         """Test empty cart display"""
@@ -38,26 +30,18 @@ class TestCart:
         assert cart_page.get_cart_items_count() == 0
         assert "Your Cart" in cart_page.get_cart_title()
     
-    def test_add_item_to_cart_and_verify(self, logged_in_driver, inventory_page, cart_page):
+    def test_add_item_to_cart_and_verify(self, cart_with_item):
         """Test adding item to cart and verifying in cart page"""
-        inventory_page.wait_for_inventory_page_to_load()
-        
-        # Add item to cart
         item_name = "Sauce Labs Backpack"
-        inventory_page.add_item_to_cart_by_name(item_name)
-        
-        # Navigate to cart
-        inventory_page.click_shopping_cart()
-        cart_page.wait_for_cart_page_to_load()
         
         # Verify item is in cart
-        assert cart_page.is_item_in_cart(item_name)
-        assert cart_page.get_cart_items_count() == 1
+        assert cart_with_item.is_item_in_cart(item_name)
+        assert cart_with_item.get_cart_items_count() == 1
         
         # Verify item details
-        item_names = cart_page.get_all_item_names()
-        item_prices = cart_page.get_all_item_prices()
-        item_quantities = cart_page.get_all_item_quantities()
+        item_names = cart_with_item.get_all_item_names()
+        item_prices = cart_with_item.get_all_item_prices()
+        item_quantities = cart_with_item.get_all_item_quantities()
         
         assert item_name in item_names
         assert len(item_prices) == 1
@@ -84,28 +68,20 @@ class TestCart:
         for item in items_to_add:
             assert cart_page.is_item_in_cart(item)
     
-    def test_remove_item_from_cart(self, logged_in_driver, inventory_page, cart_page):
+    def test_remove_item_from_cart(self, cart_with_item):
         """Test removing item from cart"""
-        inventory_page.wait_for_inventory_page_to_load()
-        
-        # Add item to cart
         item_name = "Sauce Labs Backpack"
-        inventory_page.add_item_to_cart_by_name(item_name)
-        
-        # Navigate to cart
-        inventory_page.click_shopping_cart()
-        cart_page.wait_for_cart_page_to_load()
         
         # Verify item is in cart
-        assert cart_page.is_item_in_cart(item_name)
-        initial_count = cart_page.get_cart_items_count()
+        assert cart_with_item.is_item_in_cart(item_name)
+        initial_count = cart_with_item.get_cart_items_count()
         
         # Remove item from cart
-        assert cart_page.remove_item_by_name(item_name)
+        assert cart_with_item.remove_item_by_name(item_name)
         
         # Verify item is removed
-        assert not cart_page.is_item_in_cart(item_name)
-        assert cart_page.get_cart_items_count() == initial_count - 1
+        assert not cart_with_item.is_item_in_cart(item_name)
+        assert cart_with_item.get_cart_items_count() == initial_count - 1
     
     def test_remove_all_items_from_cart(self, logged_in_driver, inventory_page, cart_page):
         """Test removing all items from cart"""
@@ -137,8 +113,10 @@ class TestCart:
         
         # Add items with known prices
         items_to_add = ["Sauce Labs Backpack", "Sauce Labs Bike Light"]
-        expected_prices = {"Sauce Labs Backpack": 29.99, "Sauce Labs Bike Light": 9.99}
-        expected_total = sum(expected_prices.values())
+        expected_total = sum([
+            TestData.get_product_price_value("Sauce Labs Backpack"),
+            TestData.get_product_price_value("Sauce Labs Bike Light")
+        ])
         
         for item in items_to_add:
             inventory_page.add_item_to_cart_by_name(item)

@@ -1,11 +1,10 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import time
-import os
 from datetime import datetime
+from .path_manager import PathManager
 
 
 class BasePage:
@@ -107,13 +106,11 @@ class BasePage:
             filename = f"screenshot_{timestamp}.png"
         
         # Create screenshots directory if it doesn't exist
-        screenshot_dir = "screenshots"
-        if not os.path.exists(screenshot_dir):
-            os.makedirs(screenshot_dir)
+        screenshot_dir = PathManager.ensure_directory_exists(PathManager.get_screenshots_path())
         
-        filepath = os.path.join(screenshot_dir, filename)
-        self.driver.save_screenshot(filepath)
-        return filepath
+        filepath = screenshot_dir / filename
+        self.driver.save_screenshot(str(filepath))
+        return str(filepath)
     
     def wait_for_page_load(self, timeout=30):
         """Wait for page to load completely"""

@@ -59,6 +59,23 @@ def run_tests(args):
     if args.parallel:
         cmd.extend(['-n', 'auto'])
     
+    # Add reporting options
+    if args.report_format:
+        if args.report_format == 'html':
+            cmd.extend(['--html=reports/report.html', '--self-contained-html'])
+        elif args.report_format == 'json':
+            cmd.extend(['--json-report', '--json-report-file=reports/report.json'])
+        elif args.report_format == 'xml':
+            cmd.extend(['--junitxml=reports/report.xml'])
+        elif args.report_format == 'all':
+            cmd.extend([
+                '--html=reports/report.html', 
+                '--self-contained-html',
+                '--json-report', 
+                '--json-report-file=reports/report.json',
+                '--junitxml=reports/report.xml'
+            ])
+    
     print(f"Running command: {' '.join(cmd)}")
     print(f"Environment: BROWSER={os.environ.get('BROWSER', 'chrome')}, "
           f"HEADLESS={os.environ.get('HEADLESS', 'false')}")
@@ -68,10 +85,32 @@ def run_tests(args):
         result = subprocess.run(cmd, check=True)
         print("-" * 50)
         print("✅ Tests completed successfully!")
+        
+        # Show report locations
+        if args.report_format:
+            print("\n📊 Reports generated:")
+            if args.report_format in ['html', 'all']:
+                print(f"   HTML Report: {os.path.abspath('reports/report.html')}")
+            if args.report_format in ['json', 'all']:
+                print(f"   JSON Report: {os.path.abspath('reports/report.json')}")
+            if args.report_format in ['xml', 'all']:
+                print(f"   XML Report: {os.path.abspath('reports/report.xml')}")
+        
         return result.returncode
     except subprocess.CalledProcessError as e:
         print("-" * 50)
         print(f"❌ Tests failed with exit code: {e.returncode}")
+        
+        # Show report locations even on failure
+        if args.report_format:
+            print("\n📊 Reports generated (may contain failure details):")
+            if args.report_format in ['html', 'all']:
+                print(f"   HTML Report: {os.path.abspath('reports/report.html')}")
+            if args.report_format in ['json', 'all']:
+                print(f"   JSON Report: {os.path.abspath('reports/report.json')}")
+            if args.report_format in ['xml', 'all']:
+                print(f"   XML Report: {os.path.abspath('reports/report.xml')}")
+        
         return e.returncode
 
 
@@ -88,6 +127,8 @@ def main():
             python run_tests.py --headless               # Run tests in headless mode
             python run_tests.py tests/test_login.py      # Run specific test file
             python run_tests.py -m smoke --parallel      # Run smoke tests in parallel
+            python run_tests.py --report-format html     # Generate HTML report
+            python run_tests.py --report-format all      # Generate all report formats
         """
     )
     
@@ -145,6 +186,12 @@ def main():
         '--parallel',
         action='store_true',
         help='Run tests in parallel'
+    )
+    
+    parser.add_argument(
+        '--report-format',
+        choices=['html', 'json', 'xml', 'all'],
+        help='Generate test reports in specified format(s)'
     )
     
     args = parser.parse_args()

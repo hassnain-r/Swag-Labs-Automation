@@ -91,31 +91,35 @@ def check_browsers():
     return available_browsers
 
 
+# Import required modules at the top
+try:
+    from selenium import webdriver
+    from webdriver_manager.chrome import ChromeDriverManager
+    from selenium.webdriver.chrome.service import Service as ChromeService
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    SELENIUM_AVAILABLE = False
+
 def test_webdriver_installation():
     """Test WebDriver installation"""
     print("\n🧪 Testing WebDriver installation...")
     
+    if not SELENIUM_AVAILABLE:
+        print("❌ Selenium and webdriver-manager not available")
+        return False
+    
+    print("✅ Selenium and webdriver-manager imported successfully")
+    
+    # Test Chrome WebDriver
     try:
-        from selenium import webdriver
-        from webdriver_manager.chrome import ChromeDriverManager
-        from selenium.webdriver.chrome.service import Service as ChromeService
-        
-        print("✅ Selenium and webdriver-manager imported successfully")
-        
-        # Test Chrome WebDriver
-        try:
-            print("Testing Chrome WebDriver...")
-            service = ChromeService(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service)
-            driver.quit()
-            print("✅ Chrome WebDriver test successful")
-            return True
-        except Exception as e:
-            print(f"❌ Chrome WebDriver test failed: {e}")
-            return False
-            
-    except ImportError as e:
-        print(f"❌ Failed to import required modules: {e}")
+        print("Testing Chrome WebDriver...")
+        service = ChromeService(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service)
+        driver.quit()
+        print("✅ Chrome WebDriver test successful")
+        return True
+    except Exception as e:
+        print(f"❌ Chrome WebDriver test failed: {e}")
         return False
 
 

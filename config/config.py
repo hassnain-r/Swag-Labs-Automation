@@ -8,7 +8,7 @@ class TestConfig:
     """Configuration class for test settings"""
     
     # Base URL
-    BASE_URL = "https://www.saucedemo.com"
+    BASE_URL = "https://www.saucedemo.com/v1/"
     
     # Browser settings
     BROWSER = os.getenv("BROWSER", "chrome").lower()

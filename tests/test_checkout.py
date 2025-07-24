@@ -1,49 +1,33 @@
 import pytest
-import sys
-import os
 
-# Add the project root to the Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Setup Python path using PathManager
+from utils.path_manager import PathManager
+PathManager.setup_python_path()
 
 from config.config import TestConfig
+from config.test_data import TestData
 
 
 class TestCheckout:
     """Test cases for checkout functionality"""
     
-    def test_checkout_page_loads_correctly(self, logged_in_driver, inventory_page, cart_page, checkout_page):
+    def test_checkout_page_loads_correctly(self, checkout_page_with_item):
         """Test that checkout page loads correctly"""
-        # Add item and navigate to checkout
-        inventory_page.wait_for_inventory_page_to_load()
-        inventory_page.add_item_to_cart_by_name("Sauce Labs Backpack")
-        inventory_page.click_shopping_cart()
-        cart_page.wait_for_cart_page_to_load()
-        cart_page.click_checkout()
-        checkout_page.wait_for_checkout_page_to_load()
-        
         # Verify checkout page elements
-        assert "/checkout-step-one.html" in checkout_page.get_current_url()
-        assert "Checkout: Your Information" in checkout_page.get_checkout_title()
-        assert checkout_page.is_element_visible(checkout_page.FIRST_NAME_FIELD)
-        assert checkout_page.is_element_visible(checkout_page.LAST_NAME_FIELD)
-        assert checkout_page.is_element_visible(checkout_page.POSTAL_CODE_FIELD)
+        assert "/checkout-step-one.html" in checkout_page_with_item.get_current_url()
+        assert "Checkout: Your Information" in checkout_page_with_item.get_checkout_title()
+        assert checkout_page_with_item.is_element_visible(checkout_page_with_item.FIRST_NAME_FIELD)
+        assert checkout_page_with_item.is_element_visible(checkout_page_with_item.LAST_NAME_FIELD)
+        assert checkout_page_with_item.is_element_visible(checkout_page_with_item.POSTAL_CODE_FIELD)
     
-    def test_checkout_form_validation_empty_fields(self, logged_in_driver, inventory_page, cart_page, checkout_page):
+    def test_checkout_form_validation_empty_fields(self, checkout_page_with_item):
         """Test checkout form validation with empty fields"""
-        # Navigate to checkout
-        inventory_page.wait_for_inventory_page_to_load()
-        inventory_page.add_item_to_cart_by_name("Sauce Labs Backpack")
-        inventory_page.click_shopping_cart()
-        cart_page.wait_for_cart_page_to_load()
-        cart_page.click_checkout()
-        checkout_page.wait_for_checkout_page_to_load()
-        
         # Try to continue with empty fields
-        checkout_page.click_continue()
+        checkout_page_with_item.click_continue()
         
         # Verify error message
-        assert checkout_page.is_error_message_displayed()
-        error_message = checkout_page.get_error_message()
+        assert checkout_page_with_item.is_error_message_displayed()
+        error_message = checkout_page_with_item.get_error_message()
         assert "Error" in error_message
     
     def test_checkout_form_validation_missing_first_name(self, logged_in_driver, inventory_page, cart_page, checkout_page):
