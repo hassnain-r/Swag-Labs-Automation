@@ -1,7 +1,7 @@
 import pytest
 
 # Setup Python path using PathManager
-from ..utils.path_manager import PathManager
+from .utils.path_manager import PathManager
 PathManager.setup_python_path()
 
 from utils.driver_factory import DriverFactory

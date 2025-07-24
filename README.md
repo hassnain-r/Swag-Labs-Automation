@@ -54,7 +54,8 @@ A comprehensive Selenium WebUI testing automation for the [Swag Labs website](ht
 webui_automation/
 ├── config/
 │   ├── __init__.py
-│   └── config.py              # Configuration settings
+│   ├── config.py              # Configuration settings
+│   └── test_data.py           # Test data and user credentials
 ├── pages/
 │   ├── __init__.py
 │   ├── login_page.py          # Login page object
@@ -63,7 +64,6 @@ webui_automation/
 │   └── checkout_page.py       # Checkout page objects
 ├── tests/
 │   ├── __init__.py
-│   ├── conftest.py            # Pytest fixtures
 │   ├── test_login.py          # Login tests
 │   ├── test_inventory.py      # Inventory tests
 │   ├── test_cart.py           # Cart tests
@@ -72,10 +72,23 @@ webui_automation/
 ├── utils/
 │   ├── __init__.py
 │   ├── base_page.py           # Base page class
-│   └── driver_factory.py      # WebDriver factory
-├── requirements.txt           # Python dependencies
+│   ├── driver_factory.py      # WebDriver factory
+│   ├── logger.py              # Logging utilities
+│   └── path_manager.py        # Path management utilities
+├── logs/                      # Test execution logs
+├── reports/                   # HTML test reports
+├── screenshots/               # Test failure screenshots
+├── __init__.py               # Package initialization
+├── check_tests.py            # Test validation script
+├── conftest.py               # Pytest fixtures and configuration
+├── open_report.py            # Report opening utility
 ├── pytest.ini               # Pytest configuration
-└── README.md                # This file
+├── quick_test.py            # Quick test runner
+├── README.md                # This file
+├── REPORTING_GUIDE.md       # Reporting documentation
+├── requirements.txt         # Python dependencies
+├── run_tests.py            # Test execution script
+└── setup_webdriver.py      # WebDriver setup utility
 ```
 
 ## 🧪 Running Tests
